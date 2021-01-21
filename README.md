@@ -1,4 +1,4 @@
 # TP-1_POA
-Commands communication between client and server with Sockets 
+Commands communication between a client and a server with Sockets 
 
 Forthcoming...
