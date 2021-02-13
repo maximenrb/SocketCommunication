@@ -1,11 +1,19 @@
 import java.io.*;
 import java.net.Socket;
+import java.util.Scanner;
 
 public class ApplicationClient {
     BufferedReader commandBuffer = null;
+    String outFilePath;
 
-    public ApplicationClient() {
+    String hostname;
+    int port;
+
+    public ApplicationClient(String hostname, int port) {
         System.out.println("Create ApplicationClient instance");
+
+        this.hostname = hostname;
+        this.port = port;
     }
 
     /**
@@ -18,8 +26,8 @@ public class ApplicationClient {
                 String currentCommand;
 
                 if ((currentCommand = commandBuffer.readLine()) != null) {
-                    System.out.println("Command line: " + currentCommand);
-                    return new Command();
+                    System.out.println("Command: " + currentCommand);
+                    return new Command(currentCommand);
                 }
 
             } catch (IOException e) {
@@ -34,6 +42,8 @@ public class ApplicationClient {
      *  Initialise : ouvre les différents fichiers de lecture et écriture
      */
     public void initialise(String commandFile, String OutputFile) {
+        outFilePath = OutputFile;
+        
         try {
             commandBuffer = new BufferedReader(new FileReader(commandFile));
 
@@ -42,8 +52,23 @@ public class ApplicationClient {
             System.out.println("Command file not found");
             System.exit(-1);
         }
+    }
 
+    public void writeInFile(String result) {
+        try {
+            FileWriter fw = new FileWriter(outFilePath, true);
+            BufferedWriter bw = new BufferedWriter(fw);
+            bw.write(result);
+            bw.newLine();
+            bw.close();
+            fw.close();
 
+            System.out.println("Successfully wrote to the file.");
+
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -54,6 +79,47 @@ public class ApplicationClient {
      *  décrit plus haut, qui seront appelées par  traiteCommande(Command command)
      */
     public Object treatCommand(Command command) {
+        try {
+            // 1. Creating a new socket
+            // System.out.println("Opening socket at " + hostname + ":" + port);
+            Socket socket = new Socket(hostname, port);
+
+            // 2. Getting an OutputStream from the socket
+            // 3. Creating an ObjectOutputStream from the OutputStream
+            ObjectOutput outputStream = new ObjectOutputStream(socket.getOutputStream());
+
+            // 2. Get an InputStream from the socket server
+            // 3. Create an ObjectInputStream from the InputStream
+            ObjectInput inputStream = new ObjectInputStream(socket.getInputStream());
+
+            Object result = null;
+
+            // 4. Writing object
+            // System.out.println("Writing command object");
+            outputStream.writeObject(command);
+
+            try {
+                result = inputStream.readObject();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+
+            // 5. Close Stream and socket
+            outputStream.flush();
+            outputStream.close();
+            inputStream.close();
+
+            socket.close();
+
+            return result;
+
+        } catch (IOException e) {
+            e.printStackTrace();
+
+            System.out.println("Error with socket, check stack trace");
+            System.exit(-2);
+        }
+
         return null;
     }
 
@@ -63,18 +129,47 @@ public class ApplicationClient {
      *  treatCommand(Commande uneCommande).
      */
     public void scenario() {
-        System.out.println("Starting treatments:");
+        System.out.println("Starting scenario:");
         Command command = getNextCommand();
 
         while (command != null) {
-            System.out.println("\tTreatment of: " + command);
-            Object result = treatCommand(command);
+            //System.out.println("\tTreatment of: " + command);
+            Object resultObj = treatCommand(command);
+            writeInFile(String.valueOf(resultObj));
+            System.out.println("Result: " + resultObj + "\n");
 
-            System.out.println("\t\tResult: " + result);
             command = getNextCommand();
         }
 
-        System.out.println("End of treatments");
+        System.out.println("End of scenario");
+    }
+
+
+    public void commandFromPrompt() {
+        boolean userExit = false;
+        System.out.println("You can enter command in prompt. Do -e to exit, or -h to show some help");
+
+        while (!userExit) {
+            Scanner scan = new Scanner(System.in);
+
+            System.out.print("> ");
+            String userInput = scan.next();
+
+            if (userInput.contains("-h") || userInput.contains("--help")) {
+                System.out.println("-h, --help \t\t Show some help\n" +
+                        "-e, --exit \t\t Exit the program\n" +
+                        "-f, --file \t\t Send command to server from a file, use like this: -f <relative path> \t\t Ex: -f client/input/commandes.txt");
+
+            } else if (userInput.contains("-e") || userInput.contains("--exit")) {
+                userExit = true;
+
+            } else if (userInput.contains("-f") || userInput.contains("--file")) {
+
+            } else {
+                Object result = treatCommand(new Command(userInput));
+                System.out.println("Result: " + result + "\n");
+            }
+        }
     }
 
 
@@ -131,16 +226,11 @@ public class ApplicationClient {
 
         } else {
             // Create ApplicationClient instance, and initialise
-            ApplicationClient applicationClient = new ApplicationClient();
+            ApplicationClient applicationClient = new ApplicationClient(hostname, port);
             applicationClient.initialise(commandFilePath, outputFilePath);
             applicationClient.scenario();
 
-//            try {
-//                Socket socket = new Socket(hostname, port);
-//
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
+            applicationClient.commandFromPrompt();
         }
     }
 
