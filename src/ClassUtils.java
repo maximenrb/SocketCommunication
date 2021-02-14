@@ -1,5 +1,12 @@
 import java.util.Map;
 
+/**
+ * Title:       Class Utils class (used to get Class from name (String))
+ * Copyright:   Copyright (c) 2021
+ * @author Maxime NARBAUD
+ * @version 1.0
+ */
+
 public final class ClassUtils {
     private static final Map<String, Class<?>> typeMap = Map.of(
                 "boolean", boolean.class,

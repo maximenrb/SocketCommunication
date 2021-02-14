@@ -1,3 +1,10 @@
+/**
+ * Title:       Console Utils class (used to color console message)
+ * Copyright:   Copyright (c) 2021
+ * @author Maxime NARBAUD
+ * @version 1.0
+ */
+
 public final class ConsoleUtils {
     // Reset
     public static final String RESET = "\033[0m";  // Text Reset

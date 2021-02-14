@@ -2,6 +2,13 @@ import java.io.*;
 import java.net.Socket;
 import java.util.Scanner;
 
+/**
+ * Title:       Application Client class for TP1
+ * Copyright:   Copyright (c) 2021
+ * @author Maxime NARBAUD
+ * @version 1.0
+ */
+
 public class ApplicationClient {
     BufferedReader commandBuffer = null;
     String hostname, outFilePath;
@@ -187,12 +194,14 @@ public class ApplicationClient {
 
 
     /**
-     *  >> Main program
+     *  Main program
      *  Take 4 args:    1. Server hostname
      *                  2. Server port
      *                  3. Command file path
      *                  4. Output file path
      *  This method create an instance of the ApplicationClient class, initialize it, then apply the scenario
+     *
+     *  @param args arguments of the main program
      */
     public static void main(String[] args) {
         // Variables declaration
@@ -250,7 +259,7 @@ public class ApplicationClient {
     }
 
     /**
-     *  Prints correct arguments usage
+     *  Prints correct program arguments usage
      */
     public static void printCorrectUsageAndExit() {
         System.out.println("Correct usage : java ApplicationClient.java <hostname> <port> <command file> <output file>");

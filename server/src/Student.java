@@ -3,12 +3,12 @@ package src;
 import java.util.Vector;
 
 /**
- * Title:        Classes for TP1
+ * Title:        Student class for TP1
  * Copyright:    Copyright (c) 2015
  * Company:      UQAC
+ * Translate by: Maxime NARBAUD
  * @author Hamid Mcheick et Hafedh Mili
  * @version 1.1
- * Translate by: Maxime NARBAUD
  */
 
 public class Student {

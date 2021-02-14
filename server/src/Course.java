@@ -1,18 +1,16 @@
 package src;
 
-import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Set;
-
 import static java.lang.Float.NaN;
 
 /**
- * Title:        Classes for TP1
+ * Title:        Course class for TP1
  * Copyright:    Copyright (c) 2015
  * Company:      UQAC
- * @author Hamid Mcheick et Hafedh Mili
- * @version 1.0
  * Translate by: Maxime NARBAUD
+ * @author Hamid Mcheick et Hafedh Mili
+ * @version 1.1
  */
 
 public class Course {

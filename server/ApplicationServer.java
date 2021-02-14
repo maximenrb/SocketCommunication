@@ -10,6 +10,14 @@ import java.net.Socket;
 import java.nio.file.Path;
 import java.util.HashMap;
 
+/**
+ * Title:       Application Server class for TP1
+ * Copyright:   Copyright (c) 2021
+ * @author Maxime NARBAUD
+ * @version 1.0
+ */
+
+
 public class ApplicationServer {
     private ServerSocket serverSocket;
     private final HashMap<String, Object> objectMap = new HashMap<>();
@@ -298,7 +306,7 @@ public class ApplicationServer {
     /**
      *  Treats the loading of a class. Confirms to the client that the creation was done correctly.
      *
-     *  @param nomQualifie
+     *  @param nomQualifie no desc
      */
     public void treatLoad(String nomQualifie) {
         System.out.println("\tLoading class " + nomQualifie);
@@ -351,12 +359,14 @@ public class ApplicationServer {
     }
 
     /**
-     *  >> Main Program
+     *  Main Program
      *  Take 4 args:    1. Server port
      *                  2. General sources repertory
      *                  3. Classes repertory
      *                  4. Output file path
      *  This method creates an instance of ApplicationServer class, initialize it and then wait clients
+     *
+     *  @param args arguments of the main program
      */
     public static void main(String[] args) {
         // Variables declaration
@@ -415,7 +425,7 @@ public class ApplicationServer {
     }
 
     /**
-     *  Prints correct arguments usage
+     *  Prints correct program arguments usage
      */
     public static void printCorrectUsageAndExit() {
         System.out.println("Correct usage : java ApplicationServer.java <port> <source directory> <classes directory> <log file>");
