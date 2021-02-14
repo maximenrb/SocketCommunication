@@ -8,11 +8,11 @@ import static java.lang.Float.NaN;
 
 /**
  * Title:        Classes for TP1
- * Description:
  * Copyright:    Copyright (c) 2015
  * Company:      UQAC
  * @author Hamid Mcheick et Hafedh Mili
  * @version 1.0
+ * Translate by: Maxime NARBAUD
  */
 
 public class Course {

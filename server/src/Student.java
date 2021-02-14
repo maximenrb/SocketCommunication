@@ -4,11 +4,11 @@ import java.util.Vector;
 
 /**
  * Title:        Classes for TP1
- * Description:
  * Copyright:    Copyright (c) 2015
  * Company:      UQAC
  * @author Hamid Mcheick et Hafedh Mili
- * @version 1.0
+ * @version 1.1
+ * Translate by: Maxime NARBAUD
  */
 
 public class Student {
