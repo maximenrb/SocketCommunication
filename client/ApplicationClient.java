@@ -4,11 +4,14 @@ import java.util.Scanner;
 
 public class ApplicationClient {
     BufferedReader commandBuffer = null;
-    String outFilePath;
-
-    String hostname;
+    String hostname, outFilePath;
     int port;
 
+    /**
+     *  ApplicationClient Constructor
+     *  @param hostname server hostname
+     *  @param port server port
+     */
     public ApplicationClient(String hostname, int port) {
         System.out.println("Create ApplicationClient instance");
 
@@ -17,14 +20,15 @@ public class ApplicationClient {
     }
 
     /**
-     *  Prend le fichier contenant la liste des commandes, et le charge dans une
-     *  variable du type Command qui est retournée
+     *  Takes the file containing the list of commands, and loads it into a variable of type Command which is returned
+     *  @return the Command read in the next file line, else return null
      */
     public Command getNextCommand() {
         if (commandBuffer != null) {
             try {
                 String currentCommand;
 
+                // Get the next command until the file is finished
                 if ((currentCommand = commandBuffer.readLine()) != null) {
                     System.out.println("Command: " + currentCommand);
                     return new Command(currentCommand);
@@ -39,10 +43,12 @@ public class ApplicationClient {
     }
 
     /**
-     *  Initialise : ouvre les différents fichiers de lecture et écriture
+     *  Initialise and open command and output files
+     *  @param commandFile command file path
+     *  @param outputFile output file path
      */
-    public void initialise(String commandFile, String OutputFile) {
-        outFilePath = OutputFile;
+    public void initialise(String commandFile, String outputFile) {
+        outFilePath = outputFile;
         
         try {
             commandBuffer = new BufferedReader(new FileReader(commandFile));
@@ -54,7 +60,10 @@ public class ApplicationClient {
         }
     }
 
-    public void writeInFile(String result) {
+    /**
+     * @param result the result of the executed Command
+     */
+    public void writeResultInFile(String result) {
         try {
             FileWriter fw = new FileWriter(outFilePath, true);
             BufferedWriter bw = new BufferedWriter(fw);
@@ -72,11 +81,11 @@ public class ApplicationClient {
     }
 
     /**
-     *  Prend une Command dûment formatée, et la fait exécuter par le serveur. Le résultat de
-     *  l’exécution est retournée. Si la commande ne retourne pas de résultat, on retourne null.
-     *	Chaque appel doit ouvrir une connexion, exécuter, et fermer la connexion. Si vous le
-     *  souhaitez, vous pourriez écrire six fonctions spécialisées, une par type de commande
-     *  décrit plus haut, qui seront appelées par  traiteCommande(Command command)
+     *  Takes a Command, and execute it on the server. The result of the execution is returned.
+     *  If the command does not return a result, we return null. Each call must open a connection,
+     *  execute, and close the connection.
+     *  @param command take the Command read in the file
+     *  @return the result of the executed Command, else return null
      */
     public Object treatCommand(Command command) {
         try {
@@ -84,8 +93,8 @@ public class ApplicationClient {
             // System.out.println("Opening socket at " + hostname + ":" + port);
             Socket socket = new Socket(hostname, port);
 
-            // 2. Getting an OutputStream from the socket
-            // 3. Creating an ObjectOutputStream from the OutputStream
+            // 2. Get an OutputStream from the socket
+            // 3. Create an ObjectOutputStream from the OutputStream
             ObjectOutput outputStream = new ObjectOutputStream(socket.getOutputStream());
 
             // 2. Get an InputStream from the socket server
@@ -95,7 +104,6 @@ public class ApplicationClient {
             Object result = null;
 
             // 4. Writing object
-            // System.out.println("Writing command object");
             outputStream.writeObject(command);
 
             try {
@@ -124,27 +132,26 @@ public class ApplicationClient {
     }
 
     /**
-     *  Cette méthode vous sera fournie plus tard. Elle indiquera la séquence d’étapes à exécuter
-     *  pour le test. Elle fera des appels successifs à saisisCommande(BufferedReader fichier) et
-     *  treatCommand(Commande uneCommande).
+     *  It contains the sequence of steps to be performed for the test.
+     *  It will make successive calls to getNextCommand() and treatCommand(Command command).
      */
     public void scenario() {
-        System.out.println("Starting scenario:");
+        // Get the first command on the file
         Command command = getNextCommand();
 
         while (command != null) {
-            //System.out.println("\tTreatment of: " + command);
             Object resultObj = treatCommand(command);
-            writeInFile(String.valueOf(resultObj));
+            writeResultInFile(String.valueOf(resultObj));
             System.out.println("Result: " + resultObj + "\n");
 
             command = getNextCommand();
         }
-
-        System.out.println("End of scenario");
     }
 
 
+    /**
+     *  Allow user to enter commands from prompt after file execution
+     */
     public void commandFromPrompt() {
         boolean userExit = false;
         System.out.println("You can enter command in prompt. Do -e to exit, or -h to show some help");
@@ -174,10 +181,12 @@ public class ApplicationClient {
 
 
     /**
-     *  > Programme principal
-     *  Prend 4 arguments: 1) “hostname” du serveur, 2) numéro de port, 3) nom fichier commandes,
-     *  et 4) nom fichier sortie. Cette méthode doit créer une instance de la classe ApplicationClient,
-     *  l’initialiser, puis exécuter le scénario
+     *  >> Main program
+     *  Take 4 args:    1. Server hostname
+     *                  2. Server port
+     *                  3. Command file path
+     *                  4. Output file path
+     *  This method create an instance of the ApplicationClient class, initialize it, then apply the scenario
      */
     public static void main(String[] args) {
         // Variables declaration
@@ -234,6 +243,9 @@ public class ApplicationClient {
         }
     }
 
+    /**
+     *  Print correct arguments usage
+     */
     public static void printCorrectUsageAndExit() {
         System.out.println("Correct usage : java ApplicationClient.java <hostname> <port> <command file> <output file>");
         System.exit(-1);
