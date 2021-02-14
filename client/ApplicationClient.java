@@ -8,7 +8,8 @@ public class ApplicationClient {
     int port;
 
     /**
-     *  ApplicationClient Constructor
+     *  ApplicationClient Constructor: defines the hostname and the port for the client socket
+     *
      *  @param hostname server hostname
      *  @param port server port
      */
@@ -21,7 +22,8 @@ public class ApplicationClient {
 
     /**
      *  Takes the file containing the list of commands, and loads it into a variable of type Command which is returned
-     *  @return the Command read in the next file line, else return null
+     *
+     *  @return the Command read in the next file line, else returns null
      */
     public Command getNextCommand() {
         if (commandBuffer != null) {
@@ -43,7 +45,8 @@ public class ApplicationClient {
     }
 
     /**
-     *  Initialise and open command and output files
+     *  Opens command and output files
+     *
      *  @param commandFile command file path
      *  @param outputFile output file path
      */
@@ -61,7 +64,9 @@ public class ApplicationClient {
     }
 
     /**
-     * @param result the result of the executed Command
+     *  Writes result in the output file, creates a new file if not exist, else adds at the end
+     *
+     *  @param result the result of the executed Command that you want to write in output file
      */
     public void writeResultInFile(String result) {
         try {
@@ -84,8 +89,9 @@ public class ApplicationClient {
      *  Takes a Command, and execute it on the server. The result of the execution is returned.
      *  If the command does not return a result, we return null. Each call must open a connection,
      *  execute, and close the connection.
-     *  @param command take the Command read in the file
-     *  @return the result of the executed Command, else return null
+     *
+     *  @param command takes the Command read in the file
+     *  @return the result of the executed Command, else returns null
      */
     public Object treatCommand(Command command) {
         try {
@@ -150,7 +156,7 @@ public class ApplicationClient {
 
 
     /**
-     *  Allow user to enter commands from prompt after file execution
+     *  Allows user to enter commands from prompt after file execution
      */
     public void commandFromPrompt() {
         boolean userExit = false;
@@ -244,7 +250,7 @@ public class ApplicationClient {
     }
 
     /**
-     *  Print correct arguments usage
+     *  Prints correct arguments usage
      */
     public static void printCorrectUsageAndExit() {
         System.out.println("Correct usage : java ApplicationClient.java <hostname> <port> <command file> <output file>");

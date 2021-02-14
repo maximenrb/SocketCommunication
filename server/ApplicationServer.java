@@ -15,8 +15,9 @@ public class ApplicationServer {
     private final HashMap<String, Object> objectMap = new HashMap<>();
 
     /**
-     *  > Constructeur
-     *  Prend le numéro de port, crée un SocketServer sur le port
+     *  ApplicationServer constructor: creates a SocketServer on the indicated port
+     *
+     *  @param port server port
      */
     public ApplicationServer(int port) {
         try {
@@ -32,34 +33,26 @@ public class ApplicationServer {
     }
 
     /**
-     *	Se met en attente de connexions des clients. Suite aux connexions, elle lit
-     *	ce qui est envoyé à travers la Socket, recrée l’objet Command envoyé par
-     *	le client, et appellera traiterCommande(Command command)
+     *	Wait connection from clients. Following a connection, it reads what is sent through the Socket,
+     *	recreates the Command object sent by the client, and will call treatCommand(Command command)
      */
     public void waitClient() {
-
-
         while (true) try {
-            //System.out.println("Waiting for connections...");
             Socket client = serverSocket.accept();
-
-            //System.out.println("Accepted a connection from: " + client.getInetAddress());
 
             // 2. Get an InputStream from the client socket
             // 3. Create an ObjectInputStream from the InputStream
             ObjectInput inputStream = new ObjectInputStream(client.getInputStream());
 
-            // 2. Getting an OutputStream from the client socket
-            // 3. Creating an ObjectOutputStream from the OutputStream
+            // 2. Get an OutputStream from the client socket
+            // 3. Create an ObjectOutputStream from the OutputStream
             ObjectOutput outputStream = new ObjectOutputStream(client.getOutputStream());
 
             Command command = null;
 
             // 4. Reading object
             try {
-                //System.out.println("Reading object");
                 command = (Command) inputStream.readObject();
-
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
@@ -86,48 +79,15 @@ public class ApplicationServer {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-//        try {
-//            Class<?> classTest = Class.forName("Etudiant");
-//            System.out.println(classTest);
-//
-//        } catch (ClassNotFoundException e) {
-//            e.printStackTrace();
-//        }
-//
-//        String[] argTypes = new String[1];
-//        argTypes[0] = "int";
-//        //argTypes[1] = "float";
-//
-//        Object[] argValues = new Object[1];
-//        argValues[0] = 12;
-//
-//        treatCall(this, "testeur1", argTypes, argValues);
-//
-//        argTypes = new String[0];
-//        argValues = new Object[0];
-//        treatCall(this, "testeur2", argTypes, argValues);
-//
-//        argTypes = new String[1];
-//        argTypes[0] = "Etudiant";
-//
-//        argValues = new Object[1];
-//        Etudiant etudiant = new Etudiant();
-//        etudiant.setNom("Jean Testeur");
-//        argValues[0] = etudiant;
-//
-//        treatCall(this, "testeurStudent", argTypes, argValues);
-
-
-
     }
 
     /**
-     *  Prend une Commande dument formattée, et la traite. Dépendant du type de commande,
-     *  elle appelle la méthode spécialisée
+     *  Takes a Command, and process it. Depending on the Command type, it calls the specified method
+     *
+     *  @param command takes a Command send by the client
+     *  @return the result of the executed Command
      */
     public Object treatCommand(Command command) {
-
         String[] commandStr = command.getCommandDescription().split("#");
 
         // TODO Verify commandStr length
@@ -200,7 +160,7 @@ public class ApplicationServer {
                 }
 
             case "function":
-                // Treat command without argument
+                // Treats command without argument
                 if (commandStr.length == 3) {
                     System.out.println("Treat function command without argument | Command name: " + commandStr[2] + "()");
 
@@ -247,7 +207,11 @@ public class ApplicationServer {
     }
 
     /**
-     *  Traite la lecture d’un attribut. Renvoies le résultat par le socket
+     *  Treats reading of an attribute. Return the result by the socket
+     *
+     *  @param objectPointer pointer on the object that you want you to read the attribute
+     *  @param attribute the attribute name that you want to read
+     *  @return the value of the attribute, else returns an error message
      */
     public Object treatRead(Object objectPointer, String attribute) {
         try {
@@ -278,7 +242,12 @@ public class ApplicationServer {
     }
 
     /**
-     *  Traite l’écriture d’un attribut. Confirmes au client que l’écriture s’est faite correctement.
+     *  Treats writing of an attribute. Confirms to the customer that the entry was done correctly
+     *
+     *  @param objectPointer pointer on the object that you want you to write the attribute
+     *  @param attribute the attribute name that you want to write
+     *  @param value the value that you want to write
+     *  @return "Successfully writing..." if the entry is correctly done, else returns an error message
      */
     public Object treatWrite(Object objectPointer, String attribute, Object value) {
         try {
@@ -305,7 +274,11 @@ public class ApplicationServer {
     }
 
     /**
-     *  Traite la création d’un objet. Confirme au client que la création s’est faite correctement.
+     *  Treats the creation of an object. Confirms to the customer that the creation was done correctly.
+     *
+     *  @param objectClass the class for the object that you want to instantiate
+     *  @param objectId the id for the object that you want to create
+     *  @return "Successfully creating..." if creation is correctly done, else returns an error message
      */
     public Object treatCreate(Class<?> objectClass, String objectId) {
         System.out.println("Creating class " + objectClass);
@@ -323,31 +296,38 @@ public class ApplicationServer {
     }
 
     /**
-     *  Traite le chargement d’une classe. Confirmes au client que la création s’est faite correctement.
+     *  Treats the loading of a class. Confirms to the client that the creation was done correctly.
+     *
+     *  @param nomQualifie
      */
     public void treatLoad(String nomQualifie) {
         System.out.println("\tLoading class " + nomQualifie);
     }
 
     /**
-     *  Traite la compilation d’un fichier source java. Confirme au client que
-     *  la compilation s’est faite correctement. Le fichier source est donné par son chemin
-     *  relatif par rapport au chemin des fichiers sources.
+     *  Treats the compilation of a java source file. Confirms to the client that the compilation was done correctly.
+     *  The source file is given by its relative path.
+     *
+     *  @param sourceFilePath path of the java source file (relative path)
+     *  @param outDirectoryPath path of the output directory
+     *  @return "0" if the compilation is correctly done, else returns another number
      */
     public int treatCompilation(String sourceFilePath, String outDirectoryPath) {
         String absoluteSourcePath = Path.of(sourceFilePath).toFile().getAbsolutePath();
         String absoluteOutPath = Path.of(outDirectoryPath).toFile().getAbsolutePath();
-
-        // System.out.println("\tCompiling " + absoluteSourcePath + " in " + absoluteOutPath);
 
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         return compiler.run(null, null, null, absoluteSourcePath, "-d", absoluteOutPath);
     }
 
     /**
-     *  Traite l’appel d’une méthode, en prenant comme argument l’objet sur lequel on effectue l'appel,
-     *  le nom de la fonction à appeler, un tableau de nom de types des arguments, et un tableau d'arguments
-     *  pour la fonction. Le résultat de la fonction est renvoyé par le serveur au client (ou le message que tout s’est bien passé)
+     *  Treats the call of a method. Confirms to the client if the call was correctly done or not.
+     *
+     *  @param objectPointer the pointer on the object on which the call is made
+     *  @param functionName the name of the function to call
+     *  @param types an array of arguments types names
+     *  @param argValues an array of arguments for the function (corresponding the types array)
+     *  @return the return of the called function, else returns an error message if the function not exist
      */
     public Object treatCall(Object objectPointer, String functionName, String[] types, Object[] argValues) {
         Class<?>[] classArray;
@@ -371,10 +351,12 @@ public class ApplicationServer {
     }
 
     /**
-     *  > Programme principal.
-     *  Prend 4 arguments: 1) numéro de port, 2) répertoire source, 3) répertoire classes,
-     *  et 4) nom du fichier de traces (sortie). Cette méthode doit créer une instance de
-     *  la classe ApplicationServeur, l’initialiser puis appeler aVosOrdres sur cet objet
+     *  >> Main Program
+     *  Take 4 args:    1. Server port
+     *                  2. General sources repertory
+     *                  3. Classes repertory
+     *                  4. Output file path
+     *  This method creates an instance of ApplicationServer class, initialize it and then wait clients
      */
     public static void main(String[] args) {
         // Variables declaration
@@ -432,6 +414,9 @@ public class ApplicationServer {
         }
     }
 
+    /**
+     *  Prints correct arguments usage
+     */
     public static void printCorrectUsageAndExit() {
         System.out.println("Correct usage : java ApplicationServer.java <port> <source directory> <classes directory> <log file>");
         System.exit(-1);
