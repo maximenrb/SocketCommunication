@@ -71,26 +71,6 @@ public class ApplicationClient {
     }
 
     /**
-     *  Writes result in the output file, creates a new file if not exist, else adds at the end
-     *
-     *  @param result the result of the executed Command that you want to write in output file
-     */
-    public void writeResultInFile(String result) {
-        try {
-            FileWriter fw = new FileWriter(outFilePath, true);
-            BufferedWriter bw = new BufferedWriter(fw);
-            bw.write(result);
-            bw.newLine();
-            bw.close();
-            fw.close();
-
-        } catch (IOException e) {
-            System.out.println("An error occurred.");
-            e.printStackTrace();
-        }
-    }
-
-    /**
      *  Takes a Command, and execute it on the server. The result of the execution is returned.
      *  If the command does not return a result, we return null. Each call must open a connection,
      *  execute, and close the connection.
@@ -152,7 +132,7 @@ public class ApplicationClient {
 
         while (command != null) {
             Object resultObj = treatCommand(command);
-            writeResultInFile(String.valueOf(resultObj));
+            ClassUtils.writeResultInFile(String.valueOf(resultObj), outFilePath);
             System.out.println("Result: " + resultObj + "\n");
 
             command = getNextCommand();
