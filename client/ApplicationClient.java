@@ -84,8 +84,6 @@ public class ApplicationClient {
             bw.close();
             fw.close();
 
-            System.out.println("Successfully wrote to the file.");
-
         } catch (IOException e) {
             System.out.println("An error occurred.");
             e.printStackTrace();
@@ -163,7 +161,7 @@ public class ApplicationClient {
 
 
     /**
-     *  Allows user to enter commands from prompt after file execution
+     *  Allows user to enter commands from prompt after file treatment
      */
     public void commandFromPrompt() {
         boolean userExit = false;
@@ -177,15 +175,12 @@ public class ApplicationClient {
 
             if (userInput.contains("-h") || userInput.contains("--help")) {
                 System.out.println("-h, --help \t\t Show some help\n" +
-                        "-e, --exit \t\t Exit the program\n" +
-                        "-f, --file \t\t Send command to server from a file, use like this: -f <relative path> \t\t Ex: -f client/input/commandes.txt");
+                        "-e, --exit \t\t Exit the program\n");
 
             } else if (userInput.contains("-e") || userInput.contains("--exit")) {
                 userExit = true;
 
-            } else if (userInput.contains("-f") || userInput.contains("--file")) {
-
-            } else {
+            }  else {
                 Object result = treatCommand(new Command(userInput));
                 System.out.println("Result: " + result + "\n");
             }
