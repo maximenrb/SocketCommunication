@@ -6,10 +6,7 @@ import java.io.*;
 import java.lang.reflect.*;
 import java.net.*;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * Title:       Application Server class for TP1
@@ -27,6 +24,7 @@ public class ApplicationServer {
      *  ApplicationServer constructor: creates a SocketServer on the indicated port
      *
      *  @param port server port
+     *  @param outputFilePath log file relative path
      */
     public ApplicationServer(int port, String outputFilePath) {
         this.outputFilePath = outputFilePath;
@@ -226,23 +224,28 @@ public class ApplicationServer {
      *  Treats the compilation of a java source file. Confirms to the client that the compilation was done correctly.
      *  The source file is given by its relative path.
      *
-     *  @param sourceFilesList path of the java source file (relative path)
+     *  @param sourceFilesList list of source files to compile
      *  @param outDirectoryPath path of the output directory
      *  @return "0" if the compilation is correctly done, else returns another number
      */
     public String treatCompilation(List<String> sourceFilesList, String outDirectoryPath) {
+        // Add output arguments and directory in arguments list
         sourceFilesList.add("-d");
         sourceFilesList.add(Path.of(outDirectoryPath).toFile().getAbsolutePath());
 
+        // Convert List to Array
         String[] compilationArgs = sourceFilesList.toArray(new String[0]);
 
+        // Compile files and return compilation code
         return "Compilation result: " + ToolProvider.getSystemJavaCompiler().run(null, null, null, compilationArgs);
     }
 
     /**
      *  Treats the loading of a class. Confirms to the client that the creation was done correctly.
      *
-     *  @param classPackage no desc
+     *  @param classPackage qualified class name (ex: classes.Student)
+     *  @param outClassesDirectory relative path of the output directory for .class files
+     *  @return "Successfully loading..." if class loading is correctly done, else return an error message
      */
     public String treatLoad(String classPackage, String outClassesDirectory) {
         // Giving the path of the class directory where class file is generated..
@@ -478,36 +481,4 @@ public class ApplicationServer {
         System.out.println("Correct usage : java ApplicationServer.java <port> <source directory> <classes directory> <log file>");
         System.exit(-1);
     }
-//
-//
-//    public void compile() {
-//        JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-//
-//        // Compiling the code
-//        int result = compiler.run(null, null, null,"C:\\Users\\maxna\\IntelliJIDEAProjects\\TP-1_POA\\server\\classes\\Course.java",
-//                "C:\\Users\\maxna\\IntelliJIDEAProjects\\TP-1_POA\\server\\classes\\Student.java", "-d", "C:\\Users\\maxna\\IntelliJIDEAProjects\\TP-1_POA\\server");
-//
-//        System.out.println("result " + result);
-//
-//        // Giving the path of the class directory where class file is generated..
-//        File classesDir = new File("C:\\Users\\maxna\\IntelliJIDEAProjects\\TP-1_POA\\server");
-//
-//        // Load and instantiate compiled class.
-//        URLClassLoader classLoader;
-//
-//        try {
-//            // Loading the class
-//            classLoader = URLClassLoader.newInstance(new URL[]{classesDir.toURI().toURL()});
-//            Class<?> cls = Class.forName("classes.Student", true, classLoader);
-//
-//            System.out.println(cls);
-//
-//            treatCreate(cls, "ntm");
-//
-//            System.out.println(cls);
-//
-//        } catch (Exception e) {
-//
-//        }
-//    }
 }
