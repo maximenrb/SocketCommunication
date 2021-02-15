@@ -73,3 +73,16 @@ Example:
 ```
 function#8inf853#attributeNote#classes.Student:ID(mathilde),float:3.7
 ```
+
+
+# Launching Server
+
+```
+ApplicationServer <port> <relative source directory> <relative classes directory> <relative log file path>
+```
+
+
+# Launching Client
+```
+ApplicationClient <hostname> <port> <relative command file path> <relative output file path>
+```
