@@ -58,6 +58,7 @@ public final class ClassUtils {
      *  Writes result in the output file, creates a new file if not exist, else adds at the end
      *
      *  @param result the result of the executed Command that you want to write in output file
+     *  @param outFilePath output file relative path
      */
     public static void writeResultInFile(String result, String outFilePath) {
         try {
