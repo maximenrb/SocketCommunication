@@ -2,7 +2,7 @@
 Commands communication between a client and a server with Sockets 
 
 # Commands
-1. Compilation
+## Compilation
 
 Schema:
 ```
@@ -14,7 +14,7 @@ Example:
 compilation#server/classes/Course.java,server/classes/Student.java#server/out
 ```
 
-2. Loading class
+## Loading class
 
 Schema:
 ```
@@ -26,7 +26,7 @@ Example:
 load#classes.Course#server/out
 ```
 
-3. Create class
+## Create class
 
 Schema:
 ```
@@ -38,7 +38,7 @@ Example:
 create#classes.Course#8inf853
 ```
 
-4. Write attribute
+## Write attribute
 
 Schema:
 ```
@@ -50,7 +50,7 @@ Example:
 write#8inf853#title#Architecture des applications
 ```
 
-5. Read attribute
+## Read attribute
 
 Schema:
 ```
@@ -62,8 +62,7 @@ Example:
 read#8inf853#title
 ```
 
-
-6. Call a function
+## Call a function
 
 Schema:
 ```
