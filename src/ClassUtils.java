@@ -13,7 +13,7 @@ import java.util.Map;
  */
 
 public final class ClassUtils {
-    private static final Map<String, Class<?>> typeMap = Map.of(
+    public static final Map<String, Class<?>> typeMap = Map.of(
                 "boolean", boolean.class,
                 "byte", byte.class,
                 "short", short.class,

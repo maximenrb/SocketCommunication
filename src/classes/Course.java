@@ -1,4 +1,4 @@
-package src;
+package classes;
 
 import java.util.Hashtable;
 import java.util.Set;
@@ -15,7 +15,7 @@ import static java.lang.Float.NaN;
 
 public class Course {
   private String title;
-  private final Hashtable<Student, Float> students;
+  private final Hashtable<classes.Student, Float> students;
 
   public Course() {
     this.students = new Hashtable<>();
@@ -34,19 +34,19 @@ public class Course {
     return title;
   }
 
-  public void addStudent(Student student) {
+  public void addStudent(classes.Student student) {
     students.put(student, (float) 0);
   }
 
-  public Set<Student> getStudents() {
+  public Set<classes.Student> getStudents() {
     return students.keySet();
   }
 
-  public void attributeNote(Student student, float mark) {
+  public void attributeNote(classes.Student student, float mark) {
     students.put(student, mark);
   }
 
-  public float getNote(Student student) {
+  public float getNote(classes.Student student) {
     if (students.containsKey(student)) {
       return students.get(student);
     }
@@ -56,7 +56,7 @@ public class Course {
   public String toString() {
     StringBuilder str = new StringBuilder("Course (Title: " + title + " <");
 
-    for (Student student : getStudents()) {
+    for (classes.Student student : getStudents()) {
       str.append(student).append(" = ").append(getNote(student)).append(", ");
     }
 

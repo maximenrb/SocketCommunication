@@ -1,26 +1,26 @@
-compilation#server/src/Course.java,server/src/Student.java#classes/
-load#src.Course
-create#src.Course#8inf853
+compilation#src/classes/Course.java,src/classes/Student.java#server/out
+load#classes.Course#server/out
+create#classes.Course#8inf853
 write#8inf853#title#Architecture des applications
 read#8inf853#title
-create#src.Course#8inf843
+create#classes.Course#8inf843
 write#8inf843#title#Systemes repartis
-load#src.Student
-create#src.Student#mathilde
+load#classes.Student#server/out
+create#classes.Student#mathilde
 write#mathilde#name#Mathilde Boivin
-create#src.Student#raymond
+create#classes.Student#raymond
 write#raymond#name#Raymond Sauve
-function#8inf853#getNote#src.Student:ID(mathilde)
-function#mathilde#courseRegistration#src.Course:ID(8inf853)
-function#mathilde#courseRegistration#src.Course:ID(8inf843)
-function#8inf853#attributeNote#src.Student:ID(mathilde),float:3.7
-function#8inf853#getNote#src.Student:ID(mathilde)
-function#8inf843#attributeNote#src.Student:ID(mathilde),float:4.0
+function#8inf853#getNote#classes.Student:ID(mathilde)
+function#mathilde#courseRegistration#classes.Course:ID(8inf853)
+function#mathilde#courseRegistration#classes.Course:ID(8inf843)
+function#8inf853#attributeNote#classes.Student:ID(mathilde),float:3.7
+function#8inf853#getNote#classes.Student:ID(mathilde)
+function#8inf843#attributeNote#classes.Student:ID(mathilde),float:4.0
 function#mathilde#getMean#
-function#raymond#courseRegistration#src.Course:ID(8inf853)
-function#raymond#courseRegistration#src.Course:ID(8inf843)
-function#8inf853#attributeNote#src.Student:ID(raymond),float:3.0
-function#8inf843#attributeNote#src.Student:ID(raymond),float:2.7
+function#raymond#courseRegistration#classes.Course:ID(8inf853)
+function#raymond#courseRegistration#classes.Course:ID(8inf843)
+function#8inf853#attributeNote#classes.Student:ID(raymond),float:3.0
+function#8inf843#attributeNote#classes.Student:ID(raymond),float:2.7
 function#mathilde#getMean#
 function#8inf853#toString#
 function#mathilde#toString#

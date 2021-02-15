@@ -8,8 +8,11 @@
       <sourceFolder url="file://$MODULE_DIR$/client/output" type="java-resource" />
       <sourceFolder url="file://$MODULE_DIR$/server" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/server/out" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/server/out/classes" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/server/output" type="java-resource" />
       <excludeFolder url="file://$MODULE_DIR$/classes" />
-      <excludeFolder url="file://$MODULE_DIR$/server/classes" />
+      <excludeFolder url="file://$MODULE_DIR$/src/classes" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

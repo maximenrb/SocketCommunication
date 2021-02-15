@@ -1,14 +1,15 @@
+import com.sun.tools.javac.Main;
+
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
 import java.io.*;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.lang.reflect.*;
+import java.net.*;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Title:       Application Server class for TP1
@@ -16,18 +17,20 @@ import java.util.HashMap;
  * @author Maxime NARBAUD
  * @version 1.0
  */
-
-
 public class ApplicationServer {
     private ServerSocket serverSocket;
+    private String outputFilePath;
     private final HashMap<String, Object> objectMap = new HashMap<>();
+    private final HashMap<String, Class<?>> loadedClassMap = new HashMap<>();
 
     /**
      *  ApplicationServer constructor: creates a SocketServer on the indicated port
      *
      *  @param port server port
      */
-    public ApplicationServer(int port) {
+    public ApplicationServer(int port, String outputFilePath) {
+        this.outputFilePath = outputFilePath;
+
         try {
             // 1. Creating a new server socket
             serverSocket = new ServerSocket(port);
@@ -68,10 +71,12 @@ public class ApplicationServer {
             // 5. Show objet
             if (command != null) {
                 System.out.println(ConsoleUtils.GREEN + "Received command: " + command.getCommandDescription() + ConsoleUtils.RESET);
+                ClassUtils.writeResultInFile("Command: " + command.getCommandDescription(), outputFilePath);
 
                 // Treating the command and send result to client
                 Object result = treatCommand(command);
                 System.out.println("Result: " + result);
+                ClassUtils.writeResultInFile(">> " + result, outputFilePath);
                 outputStream.writeObject(result);
             }
 
@@ -98,7 +103,6 @@ public class ApplicationServer {
     public Object treatCommand(Command command) {
         String[] commandStr = command.getCommandDescription().split("#");
 
-        // TODO Verify commandStr length
         switch (commandStr[0]) {
             case "compilation":
                 if (commandStr.length < 2) {
@@ -106,21 +110,18 @@ public class ApplicationServer {
                 }
 
                 // Split sources file path
-                String[] sourcePathArray = commandStr[1].split(",");
-
-                StringBuilder resultStr = new StringBuilder();
+                List<String> sourcePathList = new ArrayList<>(Arrays.asList(commandStr[1].split(",")));
 
                 // Call treatCompilation(..) for all source file
-                for(String sourcePath : sourcePathArray) {
-                    resultStr.append("\n\t").append(sourcePath).append(" => ").append(treatCompilation(sourcePath, commandStr[2]));
-                }
-
-                return resultStr.toString();
+                return treatCompilation(sourcePathList, commandStr[2]);
 
             case "load":
-                treatLoad(commandStr[1]);
+                if (commandStr.length < 3) {
+                    return "Load Command => Missing argument(s)";
 
-                break;
+                } else {
+                    return treatLoad(commandStr[1], commandStr[2]);
+                }
 
             case "create":
                 try {
@@ -131,7 +132,9 @@ public class ApplicationServer {
                         return "Create command => Missing object id";
 
                     } else if (commandStr.length == 3) {
-                        return treatCreate(ClassUtils.getClassFromString(commandStr[1]), commandStr[2]);
+                        if (loadedClassMap.containsKey(commandStr[1])) {
+                            return treatCreate(loadedClassMap.get(commandStr[1]), commandStr[2]);
+                        }
 
                     } else {
                         return "Create command => Too many arguments";
@@ -142,8 +145,12 @@ public class ApplicationServer {
                 }
 
             case "write":
-                // TODO : Verify arg number
-                return treatWrite(objectMap.get(commandStr[1]), commandStr[2], commandStr[3]);
+                if (commandStr.length < 4) {
+                    return "Write Command => Missing argument(s)";
+
+                } else {
+                    return treatWrite(objectMap.get(commandStr[1]), commandStr[2], commandStr[3]);
+                }
 
             case "read":
                 if (commandStr.length == 1) {
@@ -214,6 +221,71 @@ public class ApplicationServer {
         return null;
     }
 
+
+    /**
+     *  Treats the compilation of a java source file. Confirms to the client that the compilation was done correctly.
+     *  The source file is given by its relative path.
+     *
+     *  @param sourceFilesList path of the java source file (relative path)
+     *  @param outDirectoryPath path of the output directory
+     *  @return "0" if the compilation is correctly done, else returns another number
+     */
+    public String treatCompilation(List<String> sourceFilesList, String outDirectoryPath) {
+        sourceFilesList.add("-d");
+        sourceFilesList.add(Path.of(outDirectoryPath).toFile().getAbsolutePath());
+
+        String[] compilationArgs = sourceFilesList.toArray(new String[0]);
+
+        return "Compilation result: " + ToolProvider.getSystemJavaCompiler().run(null, null, null, compilationArgs);
+    }
+
+    /**
+     *  Treats the loading of a class. Confirms to the client that the creation was done correctly.
+     *
+     *  @param classPackage no desc
+     */
+    public String treatLoad(String classPackage, String outClassesDirectory) {
+        // Giving the path of the class directory where class file is generated..
+        File classesDir = new File(outClassesDirectory).getAbsoluteFile();
+
+        // Load and instantiate compiled class.
+        URLClassLoader classLoader;
+
+        try {
+            // Loading the class
+            classLoader = URLClassLoader.newInstance(new URL[]{classesDir.toURI().toURL()});
+            loadedClassMap.put(classPackage, Class.forName(classPackage, true, classLoader));
+
+            return "Successfully loading " + classPackage;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Loading error => Exception: " + e.getMessage();
+        }
+    }
+
+    /**
+     *  Treats the creation of an object. Confirms to the customer that the creation was done correctly.
+     *
+     *  @param objectClass the class for the object that you want to instantiate
+     *  @param objectId the id for the object that you want to create
+     *  @return "Successfully creating..." if creation is correctly done, else returns an error message
+     */
+    public Object treatCreate(Class<?> objectClass, String objectId) {
+        System.out.println("Creating class " + objectClass);
+
+        try {
+            Constructor<?> constructor = objectClass.getConstructor();
+            objectMap.put(objectId, constructor.newInstance());
+
+            return "Successfully creating " + objectClass + " with id " + objectId;
+
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            return "Create error => Exception with constructor: " + exception.getMessage();
+        }
+    }
+
     /**
      *  Treats reading of an attribute. Return the result by the socket
      *
@@ -275,57 +347,10 @@ public class ApplicationServer {
 
             return "Successfully writing attribute " + attribute + " with value " + value;
 
-        } catch (NoSuchFieldException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-            e.printStackTrace();
-            return "Write error => Attribute or set method not exist: " + e.getMessage();
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            return "Write error => Attribute or set method not exist: " + exception.getMessage();
         }
-    }
-
-    /**
-     *  Treats the creation of an object. Confirms to the customer that the creation was done correctly.
-     *
-     *  @param objectClass the class for the object that you want to instantiate
-     *  @param objectId the id for the object that you want to create
-     *  @return "Successfully creating..." if creation is correctly done, else returns an error message
-     */
-    public Object treatCreate(Class<?> objectClass, String objectId) {
-        System.out.println("Creating class " + objectClass);
-
-        try {
-            Constructor<?> constructor = objectClass.getConstructor();
-            objectMap.put(objectId, constructor.newInstance());
-
-            return "Successfully creating " + objectClass + " with id " + objectId;
-
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            e.printStackTrace();
-            return "Create error => Exception with constructor: " + e.getMessage();
-        }
-    }
-
-    /**
-     *  Treats the loading of a class. Confirms to the client that the creation was done correctly.
-     *
-     *  @param nomQualifie no desc
-     */
-    public void treatLoad(String nomQualifie) {
-        System.out.println("\tLoading class " + nomQualifie);
-    }
-
-    /**
-     *  Treats the compilation of a java source file. Confirms to the client that the compilation was done correctly.
-     *  The source file is given by its relative path.
-     *
-     *  @param sourceFilePath path of the java source file (relative path)
-     *  @param outDirectoryPath path of the output directory
-     *  @return "0" if the compilation is correctly done, else returns another number
-     */
-    public int treatCompilation(String sourceFilePath, String outDirectoryPath) {
-        String absoluteSourcePath = Path.of(sourceFilePath).toFile().getAbsolutePath();
-        String absoluteOutPath = Path.of(outDirectoryPath).toFile().getAbsolutePath();
-
-        JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-        return compiler.run(null, null, null, absoluteSourcePath, "-d", absoluteOutPath);
     }
 
     /**
@@ -338,13 +363,44 @@ public class ApplicationServer {
      *  @return the return of the called function, else returns an error message if the function not exist
      */
     public Object treatCall(Object objectPointer, String functionName, String[] types, Object[] argValues) {
-        Class<?>[] classArray;
+        // Giving the path of the class directory where class file is generated..
+        File classesDir = new File("server/out/").getAbsoluteFile();
+
+        // Load and instantiate compiled class.
+        URLClassLoader classLoader= null;
+
+        List<Class<?>> classList = new ArrayList<>();
 
         try {
-             classArray = ClassUtils.getClassArray(types);
+            classLoader = URLClassLoader.newInstance(new URL[]{classesDir.toURI().toURL()});
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
 
+        Class<?>[] classArray = null;
+
+        if (types != null) {
+            for (String type : types) {
+                if (ClassUtils.typeMap.containsKey(type)) {
+                    classList.add(ClassUtils.typeMap.get(type));
+
+                } else {
+                    try {
+                        classList.add(Class.forName(type, true, classLoader));
+
+                    } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            classArray = classList.toArray(new Class<?>[0]);
+        }
+
+
+        try {
             try {
-                Method method = objectPointer.getClass().getMethod(functionName, classArray);
+                Method method = objectPointer.getClass().getDeclaredMethod(functionName, classArray);
                 return "Call success => Function return: " + method.invoke(objectPointer, argValues);
 
             } catch (Exception e1) {
@@ -352,7 +408,7 @@ public class ApplicationServer {
                 return "Call error => Method reflection exception: " + e1.getMessage();
             }
 
-        } catch (IllegalArgumentException exception) {
+        } catch (Exception exception) {
             exception.printStackTrace();
             return exception.getMessage();
         }
@@ -401,18 +457,9 @@ public class ApplicationServer {
             // Get third argument (classes directory path)
             classesDirectory = args[2];
 
-            // Verify if directory exist
-            if(!new File(classesDirectory).isDirectory()) {
-                System.out.println("Entered classes directory not exist or is not a directory !");
-                error = true;
-            }
-
-            // Get last argument (log file path)
-            logFilePath = args[3];
-
             // Print user arguments
             System.out.println("Port: " + port + " || Source directory: " + sourceDirectory + " || Classes directory: "
-                    + classesDirectory + " || Log file: " + logFilePath);
+                    + classesDirectory + " || Log file: " + args[3]);
         }
 
         if(error) {
@@ -420,7 +467,7 @@ public class ApplicationServer {
 
         } else {
             // Create ApplicationServer instance
-            ApplicationServer applicationServer = new ApplicationServer(port);
+            new ApplicationServer(port, args[3]);
         }
     }
 
@@ -431,4 +478,36 @@ public class ApplicationServer {
         System.out.println("Correct usage : java ApplicationServer.java <port> <source directory> <classes directory> <log file>");
         System.exit(-1);
     }
+//
+//
+//    public void compile() {
+//        JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+//
+//        // Compiling the code
+//        int result = compiler.run(null, null, null,"C:\\Users\\maxna\\IntelliJIDEAProjects\\TP-1_POA\\server\\classes\\Course.java",
+//                "C:\\Users\\maxna\\IntelliJIDEAProjects\\TP-1_POA\\server\\classes\\Student.java", "-d", "C:\\Users\\maxna\\IntelliJIDEAProjects\\TP-1_POA\\server");
+//
+//        System.out.println("result " + result);
+//
+//        // Giving the path of the class directory where class file is generated..
+//        File classesDir = new File("C:\\Users\\maxna\\IntelliJIDEAProjects\\TP-1_POA\\server");
+//
+//        // Load and instantiate compiled class.
+//        URLClassLoader classLoader;
+//
+//        try {
+//            // Loading the class
+//            classLoader = URLClassLoader.newInstance(new URL[]{classesDir.toURI().toURL()});
+//            Class<?> cls = Class.forName("classes.Student", true, classLoader);
+//
+//            System.out.println(cls);
+//
+//            treatCreate(cls, "ntm");
+//
+//            System.out.println(cls);
+//
+//        } catch (Exception e) {
+//
+//        }
+//    }
 }

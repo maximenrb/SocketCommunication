@@ -1,4 +1,4 @@
-package src;
+package classes;
 
 import java.util.Vector;
 
@@ -13,7 +13,7 @@ import java.util.Vector;
 
 public class Student {
   private String name;
-  private final Vector<Course> courses;
+  private final Vector<classes.Course> courses;
 
   public Student() {
     this.courses = new Vector<>();
@@ -32,7 +32,7 @@ public class Student {
     return name;
   }
 
-  public void courseRegistration(Course course) {
+  public void courseRegistration(classes.Course course) {
     courses.add(course);
 
     course.addStudent(this);
@@ -42,7 +42,7 @@ public class Student {
     float markTotal = 0;
     int coursesNumber = 0;
 
-    for (Course course : courses) {
+    for (classes.Course course : courses) {
       markTotal += course.getNote(this);
       coursesNumber++;
     }
